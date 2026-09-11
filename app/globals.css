@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+/* stonklist.lol — outbid.lol shapes, stonkfun.xyz colors (CLAUDE.md §3) */
+:root {
+  --bg: #071013;
+  --bg-elev-1: #102127;
+  --bg-elev-2: #18262a;
+  --bg-elev-3: #1f4451;
+  --border: #1e3239;
+  --border-strong: #2f4f58;
+  --border-accent: #3d6672;
+
+  --fg: #f3f8f8;
+  --fg-2: #a4c5cf;
+  --fg-3: #7d949b;
+  --fg-4: #8ea2a6;
+
+  --accent: #69aac1;
+  --accent-fg: #71aabe;
+  --positive: #5ee9b5;
+  --negative: #ff6b6b;
+  --gold: #f5c451;
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-elev-1: var(--bg-elev-1);
+  --color-elev-2: var(--bg-elev-2);
+  --color-elev-3: var(--bg-elev-3);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-line-accent: var(--border-accent);
+  --color-fg: var(--fg);
+  --color-fg-2: var(--fg-2);
+  --color-fg-3: var(--fg-3);
+  --color-fg-4: var(--fg-4);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-positive: var(--positive);
+  --color-negative: var(--negative);
+  --color-gold: var(--gold);
+
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --radius-input: 20px;
+  --radius-card: 24px;
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+@layer components {
+/* Pills */
+.pill {
+  @apply inline-flex items-center gap-1.5 rounded-full border border-line px-3 h-8 text-[12.8px] font-semibold text-fg-2 transition-colors;
+}
+.pill:hover {
+  @apply bg-elev-2 text-fg;
+}
+.pill[data-active="true"] {
+  @apply bg-elev-3 border-line-accent text-fg;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-full bg-accent text-[#071013] h-11 px-6 text-[14px] font-semibold transition-opacity disabled:opacity-40;
+}
+.btn-primary:hover:not(:disabled) {
+  opacity: 0.9;
+}
+.btn-secondary {
+  @apply inline-flex items-center justify-center gap-2 rounded-full border border-line-strong bg-elev-1 text-fg h-11 px-5 text-[14px] font-semibold transition-colors;
+}
+.btn-secondary:hover {
+  @apply bg-elev-2;
+}
+
+.input {
+  @apply w-full h-11 rounded-[20px] border border-line-strong bg-elev-1 px-4 text-[14px] text-fg placeholder:text-fg-3 outline-none transition-colors;
+}
+.input:focus {
+  @apply border-line-accent;
+}
+
+.badge {
+  @apply inline-flex items-center gap-1 rounded-full border border-line px-2 h-[22px] text-[11px] font-semibold text-fg-2 whitespace-nowrap;
+}
+
+.card {
+  @apply rounded-[24px] border border-line bg-elev-1;
+}
+
+}
+
+/* Number pop animation on change */
+@keyframes pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+.pop {
+  animation: pop 320ms ease-out;
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up {
+  animation: fade-in-up 260ms ease-out both;
+}
+
+.live-dot {
+  @apply inline-block size-2 rounded-full bg-positive;
+  box-shadow: 0 0 0 0 rgba(94, 233, 181, 0.6);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(94, 233, 181, 0.5); }
+  70% { box-shadow: 0 0 0 6px rgba(94, 233, 181, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(94, 233, 181, 0); }
+}
+
+/* scrollbars in the chip row */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
