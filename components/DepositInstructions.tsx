@@ -30,7 +30,7 @@ export function DepositInstructions({
       <div className="min-w-0 flex-1">
         <h3 className="font-semibold text-[15px]">Send ${symbol} to the treasury</h3>
         <p className="text-[13px] text-fg-2 mt-1">
-          Any amount, from any wallet. It lands in the bag in ~10s. Deposits are final — we hold forever.
+          Any amount, from any wallet. It lands in the bag in ~10s. Deposits are final. We hold forever.
         </p>
         <div className="mt-3 flex items-center gap-2 rounded-[20px] border border-line-strong bg-bg px-3 h-11">
           <span className="mono text-[12px] sm:text-[13px] truncate flex-1 text-fg">{treasury}</span>

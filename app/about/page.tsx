@@ -18,7 +18,7 @@ export default function AboutPage() {
           move, so ranks move. A pump climbs you. A dump drops you. Nobody gets a refund.
         </p>
         <p>
-          The twist: many StonkFun coins are <span className="text-fg">reward-mode</span> — a 1–3% transfer tax gets paid out to
+          Many StonkFun coins are <span className="text-fg">reward-mode</span>: a 1–3% transfer tax gets paid out to
           holders in the coin&apos;s quote asset (SPYx, ZEC, SOL, whatever it&apos;s paired with). Since the treasury is a holder,
           it earns those dividends, and we count every dollar received toward your score. Forever. Even if your bag goes to zero.
         </p>

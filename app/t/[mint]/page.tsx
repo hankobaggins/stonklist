@@ -165,7 +165,7 @@ export default async function ListingPage({ params }: Params) {
               </thead>
               <tbody>
                 {l.mode !== "reward" ? (
-                  <tr><td colSpan={4} className="px-4 py-6 text-center text-fg-3">standard token — no transfer tax, no dividends.</td></tr>
+                  <tr><td colSpan={4} className="px-4 py-6 text-center text-fg-3">standard token: no transfer tax, so no dividends.</td></tr>
                 ) : dividends.length === 0 ? (
                   <tr><td colSpan={4} className="px-4 py-6 text-center text-fg-3">no payouts received yet.</td></tr>
                 ) : (

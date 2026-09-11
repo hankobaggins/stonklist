@@ -180,7 +180,7 @@ export function ClaimFlow({ initialMint, treasury }: { initialMint: string; trea
               </div>
               <div className="mt-4 flex gap-2">
                 {preview.alreadyListed ? (
-                  <Link href={`/t/${preview.mint}`} className="btn-primary">Already listed — add to the bag</Link>
+                  <Link href={`/t/${preview.mint}`} className="btn-primary">Already listed · add to the bag</Link>
                 ) : (
                   <button className="btn-primary" onClick={() => setStep(2)}>Continue</button>
                 )}
@@ -194,7 +194,7 @@ export function ClaimFlow({ initialMint, treasury }: { initialMint: string; trea
         <section className="mt-6 card p-5">
           <h2 className="font-semibold text-[16px]">Prove you own a wallet, add your links</h2>
           <p className="text-[13px] text-fg-2 mt-1">
-            You sign a message — nothing is sent on-chain and we never ask for keys. The signer becomes the listing owner
+            You sign a message. Nothing is sent on-chain and we never ask for keys. The signer becomes the listing owner
             (can edit the tagline later). Anyone can still deposit.
           </p>
           <div className="mt-4 flex items-center gap-3">
