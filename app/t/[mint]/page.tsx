@@ -26,8 +26,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return {
     title,
     description: l.tagline ?? `${l.name} on stonklist.lol`,
-    openGraph: { title, images: [`/api/og/${mint}`] },
-    twitter: { card: "summary_large_image", title, images: [`/api/og/${mint}`] },
+    openGraph: { title, url: `/t/${mint}`, images: [{ url: `/api/og/${mint}`, width: 1200, height: 630, alt: title }] },
+    twitter: { card: "summary_large_image", title, description: l.tagline ?? `${l.name} on stonklist.lol`, images: [`/api/og/${mint}`] },
   };
 }
 

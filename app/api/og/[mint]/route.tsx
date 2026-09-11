@@ -20,7 +20,12 @@ export async function GET(_: Request, { params }: { params: Promise<{ mint: stri
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 28, color: "#a4c5cf" }}>
-          <div style={{ width: 20, height: 20, borderRadius: 999, background: "#5ee9b5" }} />
+          <svg width="44" height="44" viewBox="0 0 32 32" fill="none">
+            <rect x="1" y="1" width="30" height="30" rx="9" fill="#102127" stroke="#3d6672" />
+            <path d="M7 21 L13 14 L17 18 L25 9" stroke="#69aac1" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M20 9 H25 V14" stroke="#69aac1" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="9" cy="24" r="1.6" fill="#5ee9b5" />
+          </svg>
           stonklist.lol · airdrop us your stonk
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 32 }}>

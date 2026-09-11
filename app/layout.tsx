@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
@@ -12,11 +12,22 @@ export const metadata: Metadata = {
   openGraph: {
     siteName: "stonklist.lol",
     type: "website",
+    url: "/",
     title: "stonklist.lol — airdrop us your stonk",
     description: "Highest bag in the treasury takes #1. We hodl. You climb.",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "stonklist.lol — airdrop us your stonk" }],
   },
-  twitter: { card: "summary_large_image", site: "@stonklist" },
+  twitter: {
+    card: "summary_large_image",
+    site: "@stonklist",
+    title: "stonklist.lol — airdrop us your stonk",
+    description: "Highest bag in the treasury takes #1. We hodl. You climb.",
+    images: ["/og.png"],
+  },
+  manifest: "/manifest.webmanifest",
 };
+
+export const viewport: Viewport = { themeColor: "#071013", colorScheme: "dark" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
