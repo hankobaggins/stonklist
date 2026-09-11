@@ -16,18 +16,39 @@ type Preview = {
   alreadyListed: boolean; currentScore: number; topScore: number; claimPrice: number;
 };
 
+type Pubkey = { toBase58(): string; toBytes?(): Uint8Array };
 interface SolanaProvider {
   isPhantom?: boolean;
-  publicKey?: { toBase58(): string; toBytes(): Uint8Array };
-  connect(): Promise<{ publicKey: { toBase58(): string } }>;
-  signMessage(msg: Uint8Array, enc: "utf8"): Promise<{ signature: Uint8Array }>;
+  isSolflare?: boolean;
+  isBackpack?: boolean;
+  publicKey?: Pubkey | null;
+  // Phantom/Backpack resolve { publicKey }; Solflare resolves `true` and exposes provider.publicKey.
+  connect(opts?: { onlyIfTrusted?: boolean }): Promise<{ publicKey?: Pubkey } | boolean | void>;
+  signMessage(msg: Uint8Array, enc: "utf8"): Promise<{ signature: Uint8Array } | Uint8Array>;
 }
 declare global {
-  interface Window { solana?: SolanaProvider; phantom?: { solana?: SolanaProvider }; solflare?: SolanaProvider }
+  interface Window {
+    solana?: SolanaProvider;
+    phantom?: { solana?: SolanaProvider };
+    solflare?: SolanaProvider;
+    backpack?: SolanaProvider;
+  }
 }
+/** Prefer each wallet's own namespace; `window.solana` is shared and gets hijacked by whichever extension loaded last. */
 function provider(): SolanaProvider | null {
   if (typeof window === "undefined") return null;
-  return window.phantom?.solana ?? window.solana ?? window.solflare ?? null;
+  return window.phantom?.solana ?? window.solflare ?? window.backpack ?? window.solana ?? null;
+}
+function errMsg(e: unknown): string {
+  if (e && typeof e === "object" && "message" in e && typeof (e as { message: unknown }).message === "string") {
+    return (e as { message: string }).message;
+  }
+  return String(e);
+}
+function isUserReject(e: unknown): boolean {
+  const m = errMsg(e).toLowerCase();
+  const code = (e as { code?: number } | null)?.code;
+  return code === 4001 || m.includes("reject") || m.includes("cancel") || m.includes("denied");
 }
 
 export function ClaimFlow({ initialMint, treasury }: { initialMint: string; treasury: string }) {
@@ -66,10 +87,14 @@ export function ClaimFlow({ initialMint, treasury }: { initialMint: string; trea
     const p = provider();
     if (!p) { setErr("no Solana wallet found. install Phantom or Solflare."); return; }
     try {
-      const { publicKey } = await p.connect();
-      setWallet(publicKey.toBase58());
+      const res = await p.connect();
+      const pk = (res && typeof res === "object" && "publicKey" in res ? res.publicKey : null) ?? p.publicKey;
+      if (!pk) throw new Error("wallet connected but returned no public key");
+      setWallet(pk.toBase58());
       setErr(null);
-    } catch { setErr("wallet connection cancelled."); }
+    } catch (e) {
+      setErr(isUserReject(e) ? "wallet connection cancelled." : `wallet error: ${errMsg(e)}`);
+    }
   };
 
   const register = async () => {
@@ -79,7 +104,8 @@ export function ClaimFlow({ initialMint, treasury }: { initialMint: string; trea
     try {
       const ts = Date.now();
       const msg = listingMessage(preview.mint, ts);
-      const { signature } = await p.signMessage(new TextEncoder().encode(msg), "utf8");
+      const signed = await p.signMessage(new TextEncoder().encode(msg), "utf8");
+      const signature = signed instanceof Uint8Array ? signed : signed.signature;
       const r = await fetch("/api/listings", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -88,8 +114,9 @@ export function ClaimFlow({ initialMint, treasury }: { initialMint: string; trea
       const j = await r.json();
       if (!r.ok) { setErr(j.error ?? "registration failed"); return; }
       setStep(3);
-    } catch { setErr("signature cancelled."); }
-    finally { setSubmitting(false); }
+    } catch (e) {
+      setErr(isUserReject(e) ? "signature cancelled." : `wallet error: ${errMsg(e)}`);
+    } finally { setSubmitting(false); }
   };
 
   // Poll for the first deposit after registration.
