@@ -3,7 +3,9 @@ export const env = {
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   treasuryWallet: process.env.NEXT_PUBLIC_TREASURY_WALLET ?? "",
   supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
-  supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
+  // Publishable key (sb_publishable_…) is the modern anon key; legacy anon JWT still accepted.
+  supabaseAnonKey:
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
   // server only
   supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
   heliusApiKey: process.env.HELIUS_API_KEY ?? "",

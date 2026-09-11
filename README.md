@@ -26,7 +26,7 @@ Everything below is copy-paste. Order matters only for step 6.
 
 ### 1. Supabase (≈5 min)
 
-1. Create a project at supabase.com → Project Settings → API. Copy **URL**, **anon key**, **service_role key**.
+1. Create a project at supabase.com → Project Settings → API. Copy **URL**, **publishable key** (`sb_publishable_…`), and the legacy **service_role key**.
 2. SQL editor → paste `supabase/migrations/0001_init.sql` → Run. (Optionally `supabase/seed.sql` for 3 demo rows.)
 3. Database → Replication → make sure `activity` and `listings` are in the `supabase_realtime` publication (the migration adds them; confirm).
 
