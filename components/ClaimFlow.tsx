@@ -5,7 +5,7 @@ import Link from "next/link";
 import { TokenImage } from "@/components/TokenImage";
 import { QuoteChip, ModeChip } from "@/components/Chips";
 import { DepositInstructions } from "@/components/DepositInstructions";
-import { listingMessage } from "@/lib/sign";
+import { extractMint, listingMessage } from "@/lib/sign";
 import { price, shortAddr, usd, usdCompact } from "@/lib/format";
 
 type Preview = {
@@ -42,7 +42,8 @@ export function ClaimFlow({ initialMint, treasury }: { initialMint: string; trea
   const [submitting, setSubmitting] = useState(false);
   const [detected, setDetected] = useState<{ amount: number; usd: number | null } | null>(null);
 
-  const check = useCallback(async (m: string) => {
+  const check = useCallback(async (raw: string) => {
+    const m = extractMint(raw);
     if (!m || m.length < 32) return;
     setChecking(true);
     try {
@@ -115,7 +116,7 @@ export function ClaimFlow({ initialMint, treasury }: { initialMint: string; trea
             <input
               className="input w-full sm:flex-1 mono text-[13px]"
               value={mint}
-              onChange={(e) => setMint(e.target.value.trim())}
+              onChange={(e) => setMint(extractMint(e.target.value))}
               onBlur={() => void check(mint)}
               placeholder="e.g. 8RVBk8vxLiUHueLUW1f4izFVqN3nWippLhkohKg6EGkS"
               spellCheck={false}

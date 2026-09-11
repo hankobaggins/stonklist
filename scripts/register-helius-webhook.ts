@@ -12,14 +12,23 @@ if (existsSync(".env.local")) {
   }
 }
 
-const { registerWebhook } = await import("../lib/helius");
+// no top-level await: package.json has no "type":"module", so tsx compiles this file as CJS.
+async function main() {
+  const { registerWebhook } = await import("../lib/helius");
 
-const site = process.env.NEXT_PUBLIC_SITE_URL;
-const treasury = process.env.NEXT_PUBLIC_TREASURY_WALLET;
-const secret = process.env.HELIUS_WEBHOOK_SECRET;
-if (!site || !treasury || !secret || !process.env.HELIUS_API_KEY) {
-  console.error("missing env: NEXT_PUBLIC_SITE_URL, NEXT_PUBLIC_TREASURY_WALLET, HELIUS_WEBHOOK_SECRET, HELIUS_API_KEY");
-  process.exit(1);
+  const site = process.env.NEXT_PUBLIC_SITE_URL;
+  const treasury = process.env.NEXT_PUBLIC_TREASURY_WALLET;
+  const secret = process.env.HELIUS_WEBHOOK_SECRET;
+  if (!site || !treasury || !secret || !process.env.HELIUS_API_KEY) {
+    console.error("missing env: NEXT_PUBLIC_SITE_URL, NEXT_PUBLIC_TREASURY_WALLET, HELIUS_WEBHOOK_SECRET, HELIUS_API_KEY");
+    process.exit(1);
+  }
+  const result = await registerWebhook({ webhookUrl: `${site}/api/webhooks/helius`, treasury, authHeader: secret });
+  // never echo the auth header (it is HELIUS_WEBHOOK_SECRET)
+  console.log("webhook registered:", { ...(result as Record<string, unknown>), authHeader: "<redacted>" });
 }
-const result = await registerWebhook({ webhookUrl: `${site}/api/webhooks/helius`, treasury, authHeader: secret });
-console.log("webhook registered:", result);
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

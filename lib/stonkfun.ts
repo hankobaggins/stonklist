@@ -122,7 +122,13 @@ async function get<T>(
 /** Eligibility check + metadata. Returns null when the mint is not a StonkFun token (404). */
 export async function getToken(mint: string): Promise<StonkToken | null> {
   try {
-    return await get(`/tokens/${mint}`, StonkTokenSchema, { revalidate: 30 });
+    // GET /tokens/{mint} answers { data: { token: {...} } } (one level deeper than the list endpoint).
+    const data = await get(
+      `/tokens/${mint}`,
+      z.union([z.object({ token: StonkTokenSchema }), StonkTokenSchema]),
+      { revalidate: 30 },
+    );
+    return "token" in data ? data.token : data;
   } catch (e) {
     if (e instanceof StonkFunError && e.status === 404) return null;
     throw e;

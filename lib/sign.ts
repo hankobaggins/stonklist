@@ -30,3 +30,18 @@ export function isValidPubkey(s: string): boolean {
 
 /** Signed messages older than this are rejected (replay window). */
 export const SIGN_MAX_AGE_MS = 10 * 60 * 1000;
+
+/**
+ * Pull a mint out of whatever the user pasted: a bare address, a stonkfun.xyz / solscan /
+ * dexscreener / birdeye / pump.fun URL, or an address surrounded by whitespace or text.
+ * Returns the first base58 32-byte key found, else the trimmed input.
+ */
+export function extractMint(raw: string): string {
+  const s = raw.trim();
+  if (isValidPubkey(s)) return s;
+  for (const m of s.match(/[1-9A-HJ-NP-Za-km-z]{32,44}/g) ?? []) {
+    if (isValidPubkey(m)) return m;
+  }
+  return s;
+}
+
