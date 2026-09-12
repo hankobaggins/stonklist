@@ -36,7 +36,7 @@ export function tweetText(top: RankedListing, prev: { symbol: string } | null): 
   const lines = [
     "👑 new #1 on stonklist",
     "",
-    `$${top.symbol} takes the top slot with ${usd(top.score_usd)} in the treasury.${prev ? ` $${prev.symbol} dethroned.` : ""}`,
+    `$${top.symbol} takes the top slot with ${usd(top.score_usd)} in the treasury.${prev ? ` ${prev.symbol} dethroned.` : ""}`,
     "",
     `take #1 for ~${take}. we hodl. you climb.`,
   ];
