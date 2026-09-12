@@ -69,6 +69,22 @@ Helius will now POST every transfer touching the treasury to `/api/webhooks/heli
 - `curl -H "Authorization: Bearer $CRON_SECRET" https://stonklist.lol/api/cron/prices` → `{ ok: true, updated: N }`
 - `/stats` shows the treasury address; footer shows its short form.
 
+### 8. "New #1" tweets (optional, ≈2 min)
+
+Every price refresh and every deposit runs `checkCrown()` (`lib/crown.ts`). When the top mint changes it records a
+row in `crownings`, drops a "👑 $SYM took #1" line into Latest activity, and posts the `/api/og/top` card to X through
+SocialBu.
+
+1. Apply `supabase/migrations/0003_crownings.sql` in the SQL editor.
+2. SocialBu → Settings → API for Developers → copy the token into `SOCIALBU_API_TOKEN`. `SOCIALBU_ACCOUNT_ID` is the
+   stonklist.lol X account in SocialBu (202426). Push env with `scripts/go-live.sh`.
+3. First run only seeds the current king (no tweet). Preview a tweet without writing anything:
+   `curl -H "Authorization: Bearer $CRON_SECRET" "https://stonklist.lol/api/cron/crown?dry=1"`.
+   `?force=1` re-crowns and tweets the current #1 (manual re-announce).
+
+Guards: challenger must lead #2 by `CROWN_MIN_LEAD_PCT` (2) and there is at most one tweet per `CROWN_COOLDOWN_MIN`
+(30). Without a SocialBu token the crowning is still recorded (`post_error = "socialbu not configured"`).
+
 ## What's where
 
 ```
@@ -104,6 +120,11 @@ scripts/             register-helius-webhook.ts
 - "N online" in the nav is real (Supabase Realtime presence) once Supabase is configured; otherwise it just shows "live". No invented visitor counts.
 
 ## Changelog
+
+- **2026-09-12 — "new #1" share card + auto-tweet.** `/api/og/top` (1200×675 X card of the current king),
+  `crownings` table + `claim_crown()` (advisory-locked, so cron and webhook can't double-post), `lib/crown.ts`
+  detection with lead/cooldown guards, `lib/socialbu.ts` (upload_media_by_url → posts → publish), `/api/cron/crown`
+  for dry runs and manual re-announces, "crowned" rows in Latest activity.
 
 - **2026-09-11 — Phase 0–3 in one pass.** Scaffold, design system, schema, read-only leaderboard with mock data,
   listing pages, OG cards, claim flow with wallet signing, Helius webhook + ingest, three crons, stats/rules/about.

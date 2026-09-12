@@ -88,7 +88,7 @@ export interface PriceSnapshot {
   taken_at: string;
 }
 
-export type ActivityKind = "deposit" | "dividend" | "listed";
+export type ActivityKind = "deposit" | "dividend" | "listed" | "crowned";
 
 export interface Activity {
   id: number;

@@ -3,6 +3,7 @@ import { HeliusWebhookSchema, extractInbound, verifyWebhookAuth } from "@/lib/he
 import { env, hasSupabase } from "@/lib/env";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { ingestTransfers } from "@/lib/ingest";
+import { checkCrown } from "@/lib/crown";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -27,7 +28,9 @@ export async function POST(req: Request) {
     const inbound = extractInbound(parsed.data, env.treasuryWallet);
     const summary = await ingestTransfers(inbound);
     await db.from("raw_webhooks").update({ processed: true }).eq("id", logged?.id ?? -1);
-    return NextResponse.json({ ok: true, ...summary });
+    // a deposit can flip #1 — check now rather than waiting for the next price tick
+    const crown = summary.deposits + summary.dividends > 0 ? await checkCrown().catch((e) => ({ ok: false, error: String(e) })) : null;
+    return NextResponse.json({ ok: true, ...summary, crown });
   } catch (e) {
     await db.from("raw_webhooks").update({ error: String(e) }).eq("id", logged?.id ?? -1);
     return NextResponse.json({ ok: false }, { status: 200 }); // reconcile cron picks it up

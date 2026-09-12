@@ -21,6 +21,11 @@ export const env = {
   heliusWebhookSecret: process.env.HELIUS_WEBHOOK_SECRET ?? "",
   cronSecret: process.env.CRON_SECRET ?? "",
   gmgnApiKey: process.env.GMGN_API_KEY ?? "",
+  // "new #1" announcements via SocialBu (lib/crown.ts). Token: SocialBu → Settings → API for Developers.
+  socialbuToken: process.env.SOCIALBU_API_TOKEN ?? "",
+  socialbuAccountId: Number(process.env.SOCIALBU_ACCOUNT_ID ?? 0) || 0,
+  crownMinLeadPct: Number(process.env.CROWN_MIN_LEAD_PCT ?? 2) || 0,
+  crownCooldownMin: Number(process.env.CROWN_COOLDOWN_MIN ?? 30) || 0,
 };
 
 /** True when Supabase is configured; otherwise the app runs on in-memory mock data. */

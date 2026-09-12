@@ -46,6 +46,11 @@ export function ActivityFeed({ initial }: { initial: Activity[] }) {
                 <Link href={`/t/${a.mint}`} className="mono text-fg hover:text-accent-fg">${a.symbol}</Link>
                 <span className="text-fg-3"> in {a.quote_symbol}</span>
               </>
+            ) : a.kind === "crowned" ? (
+              <>
+                <span className="text-gold font-medium">👑</span>{" "}
+                <Link href={`/t/${a.mint}`} className="mono text-fg hover:text-accent-fg">${a.symbol}</Link> took #1
+              </>
             ) : (
               <>
                 <Link href={`/t/${a.mint}`} className="mono text-fg hover:text-accent-fg">${a.symbol}</Link> got listed

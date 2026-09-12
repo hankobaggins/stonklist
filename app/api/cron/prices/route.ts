@@ -3,6 +3,7 @@ import { verifyCron } from "@/lib/cron";
 import { hasSupabase } from "@/lib/env";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { getTokensPaced, absoluteAsset } from "@/lib/stonkfun";
+import { checkCrown } from "@/lib/crown";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -47,5 +48,7 @@ export async function GET(req: Request) {
       });
     }
   });
-  return NextResponse.json({ ok: true, updated, total: mints.length });
+  // scores just moved — did #1 change?
+  const crown = await checkCrown().catch((e) => ({ ok: false, error: String(e) }));
+  return NextResponse.json({ ok: true, updated, total: mints.length, crown });
 }
