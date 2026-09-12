@@ -7,6 +7,8 @@ import { QuoteChip, ModeChip } from "@/components/Chips";
 import { DepositInstructions } from "@/components/DepositInstructions";
 import { extractMint, listingMessage } from "@/lib/sign";
 import { price, shortAddr, usd, usdCompact } from "@/lib/format";
+import { WalletIcon, WalletPicker } from "@/components/WalletPicker";
+import { isUserReject, lastWalletId, listWallets, rememberWallet, walletErrMsg, type WalletOption } from "@/lib/wallets";
 
 type Preview = {
   mint: string; name: string; symbol: string; imageUrl: string | null;
@@ -16,48 +18,16 @@ type Preview = {
   alreadyListed: boolean; currentScore: number; topScore: number; claimPrice: number;
 };
 
-type Pubkey = { toBase58(): string; toBytes?(): Uint8Array };
-interface SolanaProvider {
-  isPhantom?: boolean;
-  isSolflare?: boolean;
-  isBackpack?: boolean;
-  publicKey?: Pubkey | null;
-  // Phantom/Backpack resolve { publicKey }; Solflare resolves `true` and exposes provider.publicKey.
-  connect(opts?: { onlyIfTrusted?: boolean }): Promise<{ publicKey?: Pubkey } | boolean | void>;
-  signMessage(msg: Uint8Array, enc: "utf8"): Promise<{ signature: Uint8Array } | Uint8Array>;
-}
-declare global {
-  interface Window {
-    solana?: SolanaProvider;
-    phantom?: { solana?: SolanaProvider };
-    solflare?: SolanaProvider;
-    backpack?: SolanaProvider;
-  }
-}
-/** Prefer each wallet's own namespace; `window.solana` is shared and gets hijacked by whichever extension loaded last. */
-function provider(): SolanaProvider | null {
-  if (typeof window === "undefined") return null;
-  return window.phantom?.solana ?? window.solflare ?? window.backpack ?? window.solana ?? null;
-}
-function errMsg(e: unknown): string {
-  if (e && typeof e === "object" && "message" in e && typeof (e as { message: unknown }).message === "string") {
-    return (e as { message: string }).message;
-  }
-  return String(e);
-}
-function isUserReject(e: unknown): boolean {
-  const m = errMsg(e).toLowerCase();
-  const code = (e as { code?: number } | null)?.code;
-  return code === 4001 || m.includes("reject") || m.includes("cancel") || m.includes("denied");
-}
-
 export function ClaimFlow({ initialMint, treasury }: { initialMint: string; treasury: string }) {
   const [mint, setMint] = useState(initialMint);
   const [preview, setPreview] = useState<Preview | null>(null);
   const [checking, setChecking] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [wallet, setWallet] = useState<string | null>(null);
+  const [wallet, setWallet] = useState<string | null>(null);          // base58 address
+  const [walletObj, setWalletObj] = useState<WalletOption | null>(null); // which wallet signed in
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [connectingId, setConnectingId] = useState<string | null>(null);
   const [siteUrl, setSiteUrl] = useState("");
   const [tagline, setTagline] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -83,29 +53,40 @@ export function ClaimFlow({ initialMint, treasury }: { initialMint: string; trea
     return () => clearTimeout(id);
   }, [initialMint, check]);
 
-  const connect = async () => {
-    const p = provider();
-    if (!p) { setErr("no Solana wallet found. install Phantom or Solflare."); return; }
+  /** Open the picker, or reconnect straight to the wallet used last time if it's still installed. */
+  const connect = () => {
+    const last = lastWalletId();
+    const w = last ? listWallets().find((x) => x.id === last && x.connected) : undefined;
+    if (w) void pick(w); else setPickerOpen(true);
+  };
+
+  const pick = async (w: WalletOption) => {
+    setConnectingId(w.id);
     try {
-      const res = await p.connect();
-      const pk = (res && typeof res === "object" && "publicKey" in res ? res.publicKey : null) ?? p.publicKey;
-      if (!pk) throw new Error("wallet connected but returned no public key");
-      setWallet(pk.toBase58());
+      const addr = await w.connect();
+      setWallet(addr);
+      setWalletObj(w);
+      rememberWallet(w.id);
+      setPickerOpen(false);
       setErr(null);
     } catch (e) {
-      setErr(isUserReject(e) ? "wallet connection cancelled." : `wallet error: ${errMsg(e)}`);
-    }
+      setErr(isUserReject(e) ? "wallet connection cancelled." : `${w.name}: ${walletErrMsg(e)}`);
+      setPickerOpen(false);
+    } finally { setConnectingId(null); }
+  };
+
+  const disconnect = async () => {
+    try { await walletObj?.disconnect(); } catch { /* best effort */ }
+    setWallet(null); setWalletObj(null); rememberWallet(null);
   };
 
   const register = async () => {
-    const p = provider();
-    if (!p || !wallet || !preview) return;
+    if (!walletObj || !wallet || !preview) return;
     setSubmitting(true); setErr(null);
     try {
       const ts = Date.now();
       const msg = listingMessage(preview.mint, ts);
-      const signed = await p.signMessage(new TextEncoder().encode(msg), "utf8");
-      const signature = signed instanceof Uint8Array ? signed : signed.signature;
+      const signature = await walletObj.signMessage(new TextEncoder().encode(msg));
       const r = await fetch("/api/listings", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -115,7 +96,7 @@ export function ClaimFlow({ initialMint, treasury }: { initialMint: string; trea
       if (!r.ok) { setErr(j.error ?? "registration failed"); return; }
       setStep(3);
     } catch (e) {
-      setErr(isUserReject(e) ? "signature cancelled." : `wallet error: ${errMsg(e)}`);
+      setErr(isUserReject(e) ? "signature cancelled." : `${walletObj.name}: ${walletErrMsg(e)}`);
     } finally { setSubmitting(false); }
   };
 
@@ -197,13 +178,22 @@ export function ClaimFlow({ initialMint, treasury }: { initialMint: string; trea
             You sign a message. Nothing is sent on-chain and we never ask for keys. The signer becomes the listing owner
             (can edit the tagline later). Anyone can still deposit.
           </p>
-          <div className="mt-4 flex items-center gap-3">
-            {wallet ? (
-              <span className="badge h-9 px-3 mono text-[12.5px]">{shortAddr(wallet, 6)}</span>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            {wallet && walletObj ? (
+              <>
+                <span className="badge h-9 px-3 gap-2 text-[12.5px]">
+                  <WalletIcon wallet={walletObj} size={18} />
+                  <span className="font-medium">{walletObj.name}</span>
+                  <span className="mono text-fg-3">{shortAddr(wallet, 6)}</span>
+                </span>
+                <button className="pill h-8" onClick={() => setPickerOpen(true)}>change</button>
+                <button className="pill h-8" onClick={() => void disconnect()}>disconnect</button>
+              </>
             ) : (
               <button className="btn-secondary" onClick={connect}>Connect wallet</button>
             )}
           </div>
+          <WalletPicker open={pickerOpen} onClose={() => setPickerOpen(false)} onPick={(w) => void pick(w)} busyId={connectingId} />
           <div className="mt-4 grid gap-3">
             <div>
               <label className="text-[12.5px] text-fg-2">Site URL (optional)</label>
