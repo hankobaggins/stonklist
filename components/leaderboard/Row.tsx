@@ -41,7 +41,12 @@ export function Row({ l }: { l: RankedListing }) {
           <span className="hidden sm:inline text-fg-3 group-hover:text-accent-fg">· see details</span>
         </div>
       </div>
-      <ScoreCell score={l.score_usd} change24h={l.score_change_24h_usd} dividends={l.dividends_usd} />
+      <ScoreCell
+        score={l.score_usd}
+        change24h={l.score_change_24h_usd}
+        dividends={l.dividends_usd}
+        dividendSymbol={l.quote_symbol}
+      />
     </Link>
   );
 }
