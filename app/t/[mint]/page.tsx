@@ -93,7 +93,7 @@ export default async function ListingPage({ params }: Params) {
         <StatTile label="Deposits" value={deposits.length} sub={l.first_deposit_at ? `first ${timeAgo(l.first_deposit_at)}` : undefined} />
       </section>
 
-      <section className="mt-6 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
+      <section className="mt-6 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6">
         <div className="card p-5">
           <div className="flex items-center justify-between">
             <h2 className="text-[14px] font-semibold tracking-[-0.02em]">Score, last 48h</h2>

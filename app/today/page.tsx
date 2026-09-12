@@ -20,8 +20,8 @@ export default async function TodayPage() {
         <h1 className="text-[32px] sm:text-[40px] font-semibold tracking-[-0.03em]">Today&apos;s movers</h1>
         <p className="mt-2 text-[15px] text-fg-2">USD deposited + dividends received in the last 24 hours.</p>
       </section>
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8">
-        <ol className="flex flex-col gap-2">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-8">
+        <ol className="min-w-0 flex flex-col gap-2">
           {rows.length === 0 ? (
             <li className="card p-10 text-center text-fg-3">quiet day. nobody&apos;s deposited in 24h.</li>
           ) : (
@@ -46,7 +46,7 @@ export default async function TodayPage() {
             ))
           )}
         </ol>
-        <aside>
+        <aside className="min-w-0">
           <h2 className="text-[14px] font-semibold tracking-[-0.02em] mb-2 px-1">Latest activity</h2>
           <ActivityFeed initial={activity} />
         </aside>

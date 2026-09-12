@@ -35,8 +35,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ c
       </div>
       <ClaimBar topScore={top} claimPrice={claimPrice(top, 0)} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8 mt-4">
-        <section aria-label="All-time ranking">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-8 mt-4">
+        <section aria-label="All-time ranking" className="min-w-0">
           {rows.length === 0 ? (
             <div className="card p-10 text-center text-fg-3">nobody&apos;s sent anything yet. be first.</div>
           ) : (
@@ -47,7 +47,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ c
             </div>
           )}
         </section>
-        <aside className="flex flex-col gap-8">
+        <aside className="min-w-0 flex flex-col gap-8">
           <TodayRail rows={today} />
           <section>
             <h2 className="text-[14px] font-semibold tracking-[-0.02em] mb-2 px-1">Latest activity</h2>
