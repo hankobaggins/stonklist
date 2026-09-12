@@ -33,10 +33,13 @@ interface CrownRow { id: number; mint: string; symbol: string; crowned_at: strin
 
 export function tweetText(top: RankedListing, prev: { symbol: string } | null): string {
   const take = usd(claimPrice(top.score_usd));
+  // No cashtags: "Name - SYMBOL" (symbol upper-cased), then the contract address on its own line.
+  const who = `${top.name} - ${top.symbol.toUpperCase()}`;
   const lines = [
     "👑 new #1 on stonklist",
     "",
-    `$${top.symbol} takes the top slot with ${usd(top.score_usd)} in the treasury.${prev ? ` ${prev.symbol} dethroned.` : ""}`,
+    `${who} takes the top slot with ${usd(top.score_usd)} in the treasury.${prev ? ` ${prev.symbol.toUpperCase()} dethroned.` : ""}`,
+    `CA: ${top.mint}`,
     "",
     `take #1 for ~${take}. we hodl. you climb.`,
   ];
@@ -65,7 +68,7 @@ export async function checkCrown(opts: { dryRun?: boolean; force?: boolean } = {
     const second = board[1];
     const minLead = env.crownMinLeadPct / 100;
     if (second && top.score_usd < second.score_usd * (1 + minLead)) {
-      return { ok: true, changed: false, king: last.symbol, reason: `lead under ${env.crownMinLeadPct}% over $${second.symbol}` };
+      return { ok: true, changed: false, king: last.symbol, reason: `lead under ${env.crownMinLeadPct}% over ${second.symbol.toUpperCase()}` };
     }
     const ageMin = (Date.now() - new Date(last.crowned_at).getTime()) / 60000;
     if (ageMin < env.crownCooldownMin) {

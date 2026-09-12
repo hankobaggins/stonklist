@@ -6,7 +6,7 @@ import { claimPrice } from "@/lib/scoring";
 import { feePct, usd } from "@/lib/format";
 
 /**
- * GET /api/og/top — the "$SYM is now #1 on stonklist" share card (1200×675, X post size).
+ * GET /api/og/top — the "SYM is now #1 on stonklist" share card (1200×675, X post size).
  * Rendered from the live leaderboard; attach https://stonklist.lol/api/og/top to the tweet.
  * `?logo=0` skips the token image (useful if a gateway is flaky).
  */
@@ -67,7 +67,7 @@ export async function GET(req: Request) {
   const top = board[0] ?? null;
   const depositCount = top ? (await getDeposits(top.mint, 1000)).length : 0;
   const take = top ? usd(claimPrice(top.score_usd)) : null;
-  const symbol = top ? `$${top.symbol}` : "nobody";
+  const symbol = top ? top.symbol.toUpperCase() : "nobody";
   const subtitle = top?.tagline ? `${top.name} · ${top.tagline}` : "Highest bag in the treasury takes #1. We hodl. You climb.";
   const headline = top ? `${symbol} is now ` : "nobody's sent anything yet. be first.";
   const headlineSize = symbol.length > 9 ? 72 : 92;
