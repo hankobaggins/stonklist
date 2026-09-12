@@ -8,7 +8,6 @@ export function Footer() {
       <div className="mx-auto max-w-[1200px] px-4 sm:px-6 py-8 flex flex-col sm:flex-row gap-4 sm:items-center justify-between text-[12.5px] text-fg-3">
         <div className="flex flex-wrap items-center gap-x-2">
           <span>no ads</span><span>·</span>
-          <span>no api keys</span><span>·</span>
           <span>no refunds</span><span>·</span>
           <span>not financial advice</span>
         </div>
